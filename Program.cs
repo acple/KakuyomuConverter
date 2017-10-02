@@ -4,37 +4,47 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ContextFreeTasks;
 using static Parsec.Parser;
 using static Parsec.Text;
 
 namespace KakuyomuConverter
 {
-    class Program
+    internal class Program
     {
-        static async Task Main(string[] args)
+        private static async Task Main(string[] args)
+            => await Run(args);
+
+        private static async ContextFreeTask Run(string[] args)
         {
             if (args.Length == 0)
                 throw new ArgumentNullException("input target file.");
-            
-            var path = args[0];
 
+            var path = args[0];
+            var text = await ReadFile(path);
+            var converted = Convert(text);
+            var newfile = Path.GetFileNameWithoutExtension(path) + "_converted" + Path.GetExtension(path);
+            await WriteFile(converted, newfile);
+        }
+
+        private static async ContextFreeTask<string> ReadFile(string path)
+        {
             using (var input = new FileStream(path, FileMode.Open, FileAccess.Read))
             using (var reader = new StreamReader(input, Encoding.UTF8))
-            {
-                var text = await reader.ReadToEndAsync();
-                var result = Convert(text);
+                return await reader.ReadToEndAsync();
+        }
 
-                var newfile = Path.GetFileNameWithoutExtension(path) + "_converted" + Path.GetExtension(path);
-                using (var output = new FileStream(newfile, FileMode.OpenOrCreate, FileAccess.Write))
-                using (var writer = new StreamWriter(output, Encoding.UTF8))
-                {
-                    await writer.FlushAsync();
-                    await writer.WriteAsync(result);
-                }
+        private static async ContextFreeTask WriteFile(string text, string path)
+        {
+            using (var output = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write))
+            using (var writer = new StreamWriter(output, Encoding.UTF8))
+            {
+                await writer.FlushAsync();
+                await writer.WriteAsync(text);
             }
         }
 
-        static string Convert(string source)
+        private static string Convert(string source)
         {
             var open = Char('《').Repeat(2);
             var close = Char('》').Repeat(2);
@@ -46,11 +56,11 @@ namespace KakuyomuConverter
             var replace = from x in plain
                           from y in emphasis
                           select $"{x}｜{y}《{new string('﹅', y.Length)}》";
-            
+
             var parser = Many(replace)
                 .Append(Many(any).ToStr())
                 .Map(x => string.Join(string.Empty, x));
-            
+
             return parser.Parse(source);
         }
     }
