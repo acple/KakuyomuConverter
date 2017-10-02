@@ -14,7 +14,7 @@ namespace KakuyomuConverter
         static async Task Main(string[] args)
         {
             if (args.Length == 0)
-                throw new ArgumentNullException("please input target file.");
+                throw new ArgumentNullException("input target file.");
             
             var path = args[0];
 
@@ -40,11 +40,11 @@ namespace KakuyomuConverter
             var close = Char('》').Repeat(2);
             var any = Char('|').Map(_ => '｜').Or(Any());
 
-            var skip = ManyTill(any, open).ToStr();
-            var accent = ManyTill(Any(), close).ToStr();
+            var plain = ManyTill(any, open).ToStr();
+            var emphasis = ManyTill(Any(), close).ToStr();
 
-            var replace = from x in skip
-                          from y in accent
+            var replace = from x in plain
+                          from y in emphasis
                           select $"{x}｜{y}《{new string('﹅', y.Length)}》";
             
             var parser = Many(replace)
