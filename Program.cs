@@ -45,17 +45,14 @@ namespace KakuyomuConverter
         {
             var open = Char('《').Repeat(2);
             var close = Char('》').Repeat(2);
-            var any = Char('|').Map(_ => '｜').Or(Any());
 
-            var plain = ManyTill(any, open).ToStr();
-            var emphasis = ManyTill(Any(), close).ToStr();
+            var emphasized =
+                from _ in open
+                from emphasis in ManyTill(Any(), close).ToStr()
+                select $"｜{emphasis}《{new string('﹅', emphasis.Length)}》";
 
-            var replace = from x in plain
-                          from y in emphasis
-                          select $"{x}｜{y}《{new string('﹅', y.Length)}》";
-
-            var parser = Many(replace)
-                .Append(Many(any).ToStr())
+            var vertical = Char('|').Map(_ => '｜').ToStr();
+            var parser = Many(emphasized | vertical | Any().ToStr())
                 .Map(x => string.Join(string.Empty, x));
 
             return parser.Parse(source);
