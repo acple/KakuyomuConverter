@@ -36,12 +36,9 @@ namespace KakuyomuConverter
 
         private static async ContextFreeTask WriteFile(string text, string path)
         {
-            using (var output = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write))
+            using (var output = new FileStream(path, FileMode.Create, FileAccess.Write))
             using (var writer = new StreamWriter(output, Encoding.UTF8))
-            {
-                await writer.FlushAsync();
                 await writer.WriteAsync(text);
-            }
         }
 
         private static string Convert(string source)
