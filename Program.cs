@@ -53,7 +53,7 @@ namespace KakuyomuConverter
 
             var vertical = Char('|').Map(_ => '｜').ToStr();
             var parser = Many(emphasized | vertical | Any().ToStr())
-                .Map(x => string.Join(string.Empty, x));
+                .ToStr();
 
             return parser.Parse(source);
         }

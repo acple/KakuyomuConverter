@@ -6,6 +6,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="ContextFreeTasks" Version="0.3.1" />
-    <PackageReference Include="ParsecSharp" Version="1.0.0" />
+    <PackageReference Include="ParsecSharp" Version="1.1.0" />
   </ItemGroup>
 </Project>
